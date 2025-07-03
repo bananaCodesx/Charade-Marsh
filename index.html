@@ -97,6 +97,9 @@
                 <button onclick="showEditTabsModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 text-xs md:text-sm rounded-full transition-all">
                     <i class="fas fa-edit mr-1"></i>Edit
                 </button>
+                <button onclick="showNewCategoryModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 text-xs md:text-sm rounded-full transition-all">
+                    <i class="fas fa-folder-plus mr-1"></i>Add Category
+                </button>
                 <button onclick="changeTab('movies')" class="tab-button bg-indigo-500 text-white px-3 py-1 text-xs md:text-sm rounded-full transition-all hover:bg-indigo-600">
                     Movies
                 </button>
@@ -1004,6 +1007,25 @@
                 </form>
             </div>
         </div>
+        <!-- New Category Modal -->
+        <div id="newCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Create New Category</h3>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Category Name</label>
+                    <input type="text" id="newCategoryName" class="w-full p-2 border rounded" placeholder="Enter category name">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="hideNewCategoryModal()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button onclick="createNewCategory()" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Edit Tabs Modal -->
         <div id="editTabsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
             <div class="bg-white rounded-xl p-6 w-full max-w-md">
@@ -1012,12 +1034,6 @@
                     <label class="block text-gray-700 mb-2">Current Categories</label>
                     <div id="currentTabsList" class="space-y-2 mb-4">
                         <!-- Current tabs will be listed here -->
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="newTabName" class="flex-grow p-2 border rounded" placeholder="New category name">
-                        <button onclick="addNewTab()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                            Add
-                        </button>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2">
@@ -1220,6 +1236,51 @@
             document.getElementById('editTabsModal').classList.add('hidden');
         }
 
+        function showNewCategoryModal() {
+            document.getElementById('newCategoryModal').classList.remove('hidden');
+            document.getElementById('newCategoryName').focus();
+        }
+
+        function hideNewCategoryModal() {
+            document.getElementById('newCategoryModal').classList.add('hidden');
+            document.getElementById('newCategoryName').value = '';
+        }
+
+        function createNewCategory() {
+            const categoryName = document.getElementById('newCategoryName').value.trim();
+            if (!categoryName) return;
+
+            const tabId = categoryName.toLowerCase().replace(/\s+/g, '-');
+            
+            // Create new tab button
+            const tabButton = document.createElement('button');
+            tabButton.className = 'tab-button bg-indigo-500 text-white px-6 py-2 rounded-full transition-all hover:bg-indigo-600';
+            tabButton.setAttribute('onclick', `changeTab('${tabId}')`);
+            tabButton.textContent = categoryName;
+            
+            // Insert after the Add Category button
+            const buttonsContainer = document.querySelector('.flex.flex-wrap.justify-center.gap-1.mb-2');
+            const addCategoryButton = buttonsContainer.querySelector('[onclick="showNewCategoryModal()"]');
+            buttonsContainer.insertBefore(tabButton, addCategoryButton.nextSibling);
+            
+            // Create new tab content
+            const tabContent = document.createElement('div');
+            tabContent.id = tabId;
+            tabContent.className = 'tab-content hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+            const instructions = document.querySelector('.mt-6.bg-white');
+            document.querySelector('.container').insertBefore(tabContent, instructions);
+            
+            // Add option to the category dropdown
+            const categorySelect = document.querySelector('#addCharadeModal select');
+            const newOption = document.createElement('option');
+            newOption.value = tabId;
+            newOption.textContent = categoryName;
+            categorySelect.appendChild(newOption);
+            
+            // Hide modal and clear input
+            hideNewCategoryModal();
+        }
+
         function addNewTab() {
             const newTabName = document.getElementById('newTabName').value.trim();
             if (!newTabName) return;
@@ -1232,9 +1293,10 @@
             tabButton.setAttribute('onclick', `changeTab('${tabId}')`);
             tabButton.textContent = newTabName;
             
-            // Insert before the Add Charade button
-            const buttonsContainer = document.querySelector('.flex.flex-wrap.justify-center.gap-2.mb-4');
-            buttonsContainer.insertBefore(tabButton, buttonsContainer.children[1]);
+            // Insert after the Add Category button
+            const buttonsContainer = document.querySelector('.flex.flex-wrap.justify-center.gap-1.mb-2');
+            const addCategoryButton = buttonsContainer.querySelector('[onclick="showNewCategoryModal()"]');
+            buttonsContainer.insertBefore(tabButton, addCategoryButton.nextSibling);
             
             // Create new tab content
             const tabContent = document.createElement('div');
